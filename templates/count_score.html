@@ -1,0 +1,558 @@
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-p34f1UUtsS3wqzfto5wAAmdvj+osOnFyQFpp4Ua3gs/ZVWx6oOypYoCJhGGScy+8" crossorigin="anonymous"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-wEmeIV1mKuiNpC+IOBjI7aAzPcEZeedi5yW5f2yOq55WWLwNGmvvx4Um1vskeMj0" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js" integrity="sha384-lpyLfhYuitXl2zRZ5Bn2fqnhNAKOAaM/0Kr9laMspuaMiZfGmfwRNFh8HlMy49eQ" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<html>
+    <script type="text/javascript" src="../JS/nav.js"></script>
+<title>計分頁面</title>
+  <style>
+   .container {  display: grid;
+  grid-template-columns: 0.8fr 0.8fr 0.8fr 0.8fr;
+  grid-template-rows: 0.4fr 1fr 0.40fr 0.8fr 1.1fr 1.5fr 0fr;
+  gap: 0px 0px;
+  grid-auto-flow: row;
+  grid-template-areas:
+    "計分板 計分板 計分板 計分板"
+	"選擇隊伍 選擇隊伍 選擇場次 選擇場次"
+    "比賽時間 比賽時間 比賽時間 比賽時間"
+    "選手A 選手A 選手B 選手B"
+    "犯規按鈕A 選手A犯規 選手B犯規 犯規按鈕B"
+    "計分按鈕A 選手A分數 選手B分數 計分按鈕B"
+    "比賽結束 比賽結束 比賽結束 比賽結束"
+    "get get get get";
+	}
+
+	.計分板 { 
+		grid-area: 計分板; 
+		width: 200px;
+		margin: 20px auto;
+		font-size: 45px;
+		text-align: center;
+	}
+	.選擇隊伍{
+		grid-area: 選擇隊伍;
+		font-size: 30px;
+		text-align: center;
+		
+	}
+	
+	.選擇場次{
+		grid-area: 選擇場次;
+		font-size: 30px;
+		text-align: center;
+	}
+	
+	.比賽時間 { 
+		grid-area: 比賽時間;
+		font-size: 30px;
+		text-align: center;
+	}
+	
+
+	
+	.選手A { 
+		grid-area: 選手A; 
+		text-align: center;
+		font-size: 35px;
+	}
+
+	.選手B { 
+		grid-area: 選手B;
+		text-align: center;
+		font-size: 30px;
+	}
+
+	.犯規按鈕A { 
+		grid-area: 犯規按鈕A; 
+		text-align: center;
+		
+	}
+
+	.選手A犯規 { 
+		grid-area: 選手A犯規;
+		text-align: center;
+		font-size: 30px;
+	}
+
+	.選手B犯規 { 
+		grid-area: 選手B犯規;
+		text-align: center;
+		font-size: 30px;
+        margin-left: 80px;
+	}
+
+	.犯規按鈕B { 
+		grid-area: 犯規按鈕B;
+		text-align: center;		
+	}
+
+	.計分按鈕A { 
+		grid-area: 計分按鈕A;
+		text-align: center;				
+	}
+
+	.選手A分數 { 
+		grid-area: 選手A分數;
+		text-align: center;		
+		font-size: 30px;
+	}
+
+	.選手B分數 { 
+		grid-area: 選手B分數;
+		text-align: center;		
+		font-size: 30px;
+        margin-left: 80px;
+	}
+
+	.計分按鈕B { 
+		grid-area: 計分按鈕B;
+		text-align: center;		
+	}
+	.比賽結束 { 
+		grid-area: 比賽結束;
+		text-align: center;		
+	}
+	.get { 
+		grid-area: get;
+		text-align: center;		
+	}
+  </style>
+  <body style="height: 100vh; background-image: linear-gradient(45deg, #93a5cf 0%, #e4efe9 100%);">
+    <div class="container">
+		<h1 class="計分板">計分板</h1>
+		
+		<div class="選擇隊伍">請選擇目前比賽隊伍   <select id="team_selct" onchange="team_selected()" style="font-size: 25px;"> </select></div>
+		
+		<div class="選擇場次">請選擇目前比賽場次   <select id="session_selct" onchange="session_selected()" style="font-size: 25px;"> </select></div>
+		
+		<div class="比賽時間">
+			<div class="input-group mb-3">
+				<input id="countdown" type="text" class="form-control" placeholder="請輸入比賽時間(ex:120)" aria-label="counterdown" aria-describedby="button-addon2">
+				<button class="btn btn-outline-secondary" type="button" onclick="start()" style="padding-left: 10px;">開始倒數</button>
+				<button class="btn btn-outline-secondary" type="button" onclick="pause()" style="padding-left: 10px;">暫停倒數</button>
+			</div>
+			<div id="timer">	</div>
+		</div>
+		
+		<div class="選手A" id ="player1">test1</div>
+		
+		<div class="選手B" id ="player2">test2</div>
+		
+		<div class="犯規按鈕A" >
+			<button class="btn btn-danger"onclick="foul_add(1)" id="foul_add_button_A">test1 犯規1次</button>
+			<button class="btn btn-secondary" onclick="foul_reduce(1)" id="foul_reduce_button_A">test1 犯規-1</button>
+
+		</div>
+		
+		<div class="選手A犯規">
+			<table class="選手A犯規">
+				<tr>
+					<td>犯規：</td>
+					<td id="foul1">0</td>
+				</tr>
+			</table>
+		</div>
+		
+		<div class="選手B犯規">
+			<table class="選手B犯規">
+				<tr>
+					<td>犯規：</td>
+					<td id="foul2">0</td>
+				</tr>
+			</table>
+		</div>
+		
+		<div class="犯規按鈕B">
+			<div class="button-container">
+				<button class="btn btn-danger"onclick="foul_add(2)" id="foul_add_button_B">test2 犯規1次</button>
+				<button class="btn btn-secondary" onclick="foul_reduce(2)" id="foul_reduce_button_B">test2 犯規-1</button>
+				<button class="btn btn-warning" style="margin-top: 10px;" onclick="foul_reset()">犯規歸零</button>
+			</div>
+		</div>
+		<div class="計分按鈕A">
+			<div class="button-container">
+				<button class="btn btn-success" onclick="point_add(1)" id="point_add_button_A">test1 得分</button>
+				<button class="btn btn-secondary" onclick="point_reduce(1)" id="point_reduce_button_A">test1 扣分</button>
+			</div>
+		</div>
+		
+		<div class="選手A分數">
+			<table class="選手A分數">
+				<tr>
+					<td>分數：</td>
+					<td id="score1">0</td>
+				</tr>
+			</table>
+		</div>
+		
+		<div class="選手B分數">
+			<table class="選手B分數">
+				<tr>
+					<td>分數：</td>
+					<td id="score2">0</td>
+				</tr>
+			</table>
+		</div>
+		<div class="計分按鈕B">
+			<div class="button-container">
+				<button class="btn btn-success" onclick="point_add(2)" id="point_add_button_B">test2 得分</button>
+				<button class="btn btn-secondary" onclick="point_reduce(2)"id="point_reduce_button_B">test2 扣分</button><br>
+				<button class="btn btn-warning" style="margin-top: 10px;" onclick="point_reset()">分數歸零</button>
+			</div>
+			
+		</div>
+		<div class="比賽結束">
+			<button class="btn btn-primary"onclick="storedata()">比賽結束</button>
+		</div>
+<!--
+		<div class="get">
+			<button onclick="getdata_point()"> get(可以拿掉)</button>
+		</div>
+-->
+		
+		
+	</div>
+
+	
+	
+	<script>
+		var countdown_temp=true;
+		var number=0;
+		
+		var team_arr;
+		var participant_arr;
+		var tree_value;
+		
+		function point_add(player) {
+			var scoreElement = document.getElementById("score" + player);
+			var score = parseInt(scoreElement.innerHTML);
+			scoreElement.innerHTML = score + 1;
+		}
+		function point_reduce(player) {
+			var scoreElement = document.getElementById("score" + player);
+			var score = parseInt(scoreElement.innerHTML);
+			if(score > 0){
+				scoreElement.innerHTML = score - 1;
+			}
+			
+		}
+		function foul_add(player){
+			var foulElement = document.getElementById("foul" + player);
+			var foul = parseInt(foulElement.innerHTML);
+			foulElement.innerHTML = foul + 1;
+		}
+		function foul_reduce(player){
+			var foulElement = document.getElementById("foul" + player);
+			var foul = parseInt(foulElement.innerHTML);
+			if (foul > 0){
+				foulElement.innerHTML = foul - 1;
+			}
+		}
+		function point_reset() {
+			document.getElementById("score1").innerHTML = "0";
+			document.getElementById("score2").innerHTML = "0";
+		}
+		function foul_reset() {
+			document.getElementById("foul1").innerHTML = "0";
+			document.getElementById("foul2").innerHTML = "0";
+		}
+		function start(){
+			if(number==0 ){
+				var timer = document.querySelector("#timer");
+				number = document.getElementById("countdown").value;
+				countdown_temp=true
+				setInterval(function(){
+					if(number > 0 && countdown_temp==true){
+						number -- ;
+						timer.innerText = number + 0 
+					}
+				}
+							, 1000);
+			}
+			else{
+				countdown_temp=true
+			}
+			
+		}
+		function pause(){
+				countdown_temp=false;
+		}
+		//-------------------------------------------------------------------------
+		//初始化 firebase
+		 var config = {
+			apiKey: "AIzaSyB3nSFSeSeboRPnJHczrqJ8wC3bYaJCOBw",
+			authDomain: "software0hw-defac.firebaseapp.com",
+			databaseURL: "https://software0hw-defac-default-rtdb.firebaseio.com",
+			projectId: "software0hw-defac",
+			storageBucket: "software0hw-defac.appspot.com",
+			messagingSenderId: "189289635598",
+			appId: "1:189289635598:web:d4a3cfd6252eb6808c415f",
+			measurementId: "G-WNGLH5K466"
+		  };
+		  firebase.initializeApp(config);
+		function storedata() {
+			var winner;
+			var p1 = document.getElementById("player1").innerHTML;
+			var p2 = document.getElementById("player2").innerHTML;
+			
+			var get_score1 = document.getElementById("score1").innerHTML;
+			var get_score2 = document.getElementById("score2").innerHTML;
+			var get_foul1 = document.getElementById("foul1").innerHTML;
+			var get_foul2 = document.getElementById("foul2").innerHTML;
+			
+			var session_data = document.getElementById("session_selct").value;//取得場次資料
+			
+			
+			if(get_score1 > get_score2){
+				winner = p1;
+			}
+			else{
+				winner = p2;
+			}
+			
+			db.collection("計分").doc(p1+ " vs " +p2).set({
+				session: session_data,
+				win: winner + " 獲勝",
+				player1_point: get_score1+"分",
+				player2_point: get_score2+"分",
+				player1_foul: get_foul1+"次數",
+				player2_foul: get_foul2+"次數",
+			});
+			
+		}
+		
+		
+		function getdata_point() {
+		
+			var p1 = document.getElementById("player1").innerHTML;
+			var p2 = document.getElementById("player2").innerHTML;
+		
+			var docRef = db.collection("計分").doc(p1+ " vs " + p2);
+			docRef.get().then(function(doc) {
+			if (doc.exists) {
+				console.log(doc.data());
+				//讀取test1的分數----------
+				var player1_point=doc.data().player1_point;
+				console.log(player1_point);
+				//------------------------
+			} else {
+				console.log("找不到文件");
+				
+			}
+			})
+			.catch(function(error) {
+				console.log("提取文件時出錯:", error);
+			});
+		}
+		
+		//--------------------------------------------------------------------------
+		async function get_all_team(){
+			var docRef = db.collection("team").doc("all_team");
+			docRef.get().then(function(doc) {
+			if (doc.exists) {
+				var all = doc.data().data;
+
+				all.forEach(function(value){
+					var opt = document.createElement('option');
+					opt.text = value;
+					document.getElementById("team_selct").appendChild(opt);
+				});
+				
+			} else {
+				console.log("找不到文件");	
+			}
+			})
+		}
+		
+		function team_selected(){
+		//	var selected = document.getElementById("team_selct").value;//取得隊伍資料
+		//	console.log(selected);
+			get_all_session();
+			
+		}
+		
+		async function session_selected(){
+			var team_arr=await get_team();
+			var tree_value=new Array(team_arr.length);
+			console.log("team_arr",team_arr);
+			for(let i=0;i<tree_value.length;i++){
+				tree_value[i]= await get_treedata("binary_tree",team_arr[i]);
+			}
+					
+			var team_selct_Index = team_selct.selectedIndex;
+			var session_selct_Index = session_selct.selectedIndex;
+			
+			console.log("test");
+			console.log(team_selct_Index);
+			console.log(session_selct_Index);
+			
+			var p1 = tree_value[team_selct_Index]['mb'][2*session_selct_Index];
+			var p2 = tree_value[team_selct_Index]['mb'][2*session_selct_Index+1];
+			
+			console.log(p1);
+			console.log(p2);
+			
+			document.getElementById("player1").innerHTML = p1;
+			document.getElementById("player2").innerHTML = p2;
+			
+			document.getElementById("foul_add_button_A").innerHTML = p1+ " 犯規一次";
+			document.getElementById("foul_reduce_button_A").innerHTML = p1+ " 犯規一次";
+			
+			document.getElementById("foul_add_button_B").innerHTML = p2+ " 犯規一次";
+			document.getElementById("foul_reduce_button_B").innerHTML = p2+ " 犯規一次";
+			
+			document.getElementById("point_add_button_A").innerHTML = p1+ " 得分";
+			document.getElementById("point_reduce_button_A").innerHTML = p1+ " 扣分";
+			
+			document.getElementById("point_add_button_B").innerHTML = p2+ " 得分";
+			document.getElementById("point_reduce_button_B").innerHTML = p2+ " 扣分";
+			
+		}
+		
+		
+		async function get_all_session(){
+			
+			var team_arr=await get_team();
+			var tree_value=new Array(team_arr.length);
+			console.log("team_arr",team_arr);
+			for(let i=0;i<tree_value.length;i++){
+				tree_value[i]= await get_treedata("binary_tree",team_arr[i]);
+			}
+			
+			
+			
+			var selected = document.getElementById("team_selct").value;//取得隊伍資料
+			var team_selct_Index = team_selct.selectedIndex; //取得隊伍資料索引值
+			
+		
+			while (session_selct.options.length > 0) {
+				session_selct.remove(0);
+			}
+
+			tree_value[team_selct_Index]["sheet"].forEach(function(value){
+				var opt = document.createElement('option');
+				opt.text = value;
+				document.getElementById("session_selct").appendChild(opt);
+			});
+				
+		
+		}
+		
+		function getdata(h1,h2) {
+			return new Promise(function(resolve, reject){
+				let getdata_return_data=null;
+				let docRef = db.collection(h1).doc(h2);
+
+				  docRef.get().then(function(doc) {
+					  if (doc.exists) {
+						let get_data=''
+						get_data=doc.data().data;
+						if (get_data.length>0){
+							getdata_return_data=get_data;
+						}
+						resolve(getdata_return_data);
+
+					  } else {
+						console.log("找不到文件");
+					  }
+					})
+					.catch(function(error) {
+					  console.log("提取文件時出錯:", error);
+					});
+				
+				});
+		}
+		function get_treedata(h1,h2) {
+		  return new Promise(function(resolve, reject){
+			  let getdata_return_data=null;
+			  let docRef = db.collection(h1).doc(h2);
+				docRef.get().then(function(doc) {
+					if (doc.exists) {
+					  let get_sheet;
+					  let get_mb;
+					  get_sheet=doc.data().sheet_data;
+					  get_mb=doc.data().mb_data;
+					  if (get_sheet.length>0){
+						 getdata_return_data={
+						  sheet:get_sheet,
+						  mb:get_mb
+						 }
+					  }
+					  resolve(getdata_return_data);
+	  
+					} else {
+					  console.log("找不到文件");
+					}
+				  })
+				  .catch(function(error) {
+					console.log("提取文件時出錯:", error);
+				  });
+			  
+			  });
+	    }
+		
+		async function get_team(){
+			team= await getdata("team","all_team");
+			console.log("team",team);
+			return team;
+		}
+		
+		
+		function getdata(h1,h2) {
+			return new Promise(function(resolve, reject){
+				let getdata_return_data=null;
+				var docRef = db.collection(h1).doc(h2);
+
+				  docRef.get().then(function(doc) {
+					  if (doc.exists) {
+						var doc_data = doc.data()
+						var get_data=''
+						console.log(doc_data);
+						get_data=doc.data().data;
+						//console.log(doc_data.data.data);
+						if (get_data.length>0){
+							getdata_return_data=get_data;
+							console.log('123 ',getdata_return_data);
+						}
+						resolve(getdata_return_data);
+
+					  } else {
+						console.log("找不到文件");
+					  }
+					})
+					.catch(function(error) {
+					  console.log("提取文件時出錯:", error);
+					});
+
+			});
+		}
+		
+		async function test(){
+			/*
+			var team_arr=await get_team();
+			var tree_value=new Array(team_arr.length);
+			//console.log("team_arr",team_arr);
+			for(let i=0;i<tree_value.length;i++){
+				tree_value[i]= await get_treedata("binary_tree",team_arr[i]);
+				
+			}
+			//console.log(tree_value);
+			*/
+			var temp = document.getElementById("session_selct").value;//取得場次資料
+			console.log(temp);
+		}
+		
+		var db = firebase.firestore();
+		//----------------------------------------------------------------------
+		
+		//test();
+		
+		get_all_team();
+		
+		get_all_session();
+		
+    </script>
+  </body>
+</html>

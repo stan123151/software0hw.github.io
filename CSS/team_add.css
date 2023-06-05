@@ -1,0 +1,14 @@
+label {
+    font-size: 30px;
+    font-family: Century Gothic;
+};
+.container{
+        width:92%;
+        overflow:hidden;
+}
+.content{
+            padding: 0.2rem;
+            max-height:450px;
+            overflow-y: scroll;
+            width:120%;
+}
